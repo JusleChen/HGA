@@ -1,0 +1,239 @@
+{
+  "dataset": "official BCICIV2a T288 -> E288 subject dependent",
+  "subjects": [
+    "A01",
+    "A02",
+    "A03",
+    "A04",
+    "A05",
+    "A06",
+    "A07",
+    "A08",
+    "A09"
+  ],
+  "seeds": [
+    11,
+    22,
+    33
+  ],
+  "classes": [
+    "LEFT_HAND",
+    "RIGHT_HAND",
+    "FEET",
+    "TONGUE"
+  ],
+  "input": {
+    "seconds": [
+      1.5,
+      6.0
+    ],
+    "samples": 1125,
+    "sfreq": 250,
+    "channels": 22,
+    "reference": "pointwise CAR",
+    "unit": "V",
+    "precision": "frozen float32 uV -> float64 V"
+  },
+  "ATCNet": {
+    "epochs": 500,
+    "batch_size": 64,
+    "optimizer": "Adam",
+    "lr": 0.001,
+    "betas": [
+      0.9,
+      0.999
+    ],
+    "eps": 1e-07,
+    "optimizer_weight_decay": 0,
+    "explicit_official_conv_L2": 0.009,
+    "explicit_official_dense_L2": 0.5,
+    "maxNorm": 0.6,
+    "scheduler": null,
+    "augmentation": null,
+    "gradient_clipping": null,
+    "normalization": "per-channel,timepoint scaler fitted across training trials only",
+    "checkpoint": "final epoch500",
+    "OOF_fits": 162,
+    "final_fits": 27
+  },
+  "TCFormer": {
+    "epochs": 1000,
+    "batch_size": 48,
+    "optimizer": "Adam",
+    "lr": 0.0009,
+    "betas": [
+      0.5,
+      0.999
+    ],
+    "eps": 1e-08,
+    "weight_decay": 0.001,
+    "scheduler": "official linear warmup20 epochs + cosine1000; step after epoch",
+    "augmentation": "official interaug1125/9 chunks; vectorized unchanged statistical recipe",
+    "normalization": "per-channel scaler pooled training trials and timepoints only",
+    "checkpoint": "final epoch1000",
+    "OOF_fits": 162,
+    "final_fits": 27
+  },
+  "LR": {
+    "views": {
+      "L0": "A_SENSOR",
+      "L1": "B_SENSOR_EXTRA",
+      "L2": "C_HGA_AUGMENT",
+      "L3": "D_RANDOM_AUGMENT",
+      "SOURCE_ONLY": "SOURCE_ONLY"
+    },
+    "C_grid": [
+      0.01,
+      0.1,
+      1.0
+    ],
+    "C_tie_break": "smallest C",
+    "solver": "lbfgs",
+    "max_iter": 2000,
+    "tol": 1e-07,
+    "blocks": "StandardScaler/PCA48/scoreStandardScaler; no sqrt48",
+    "OOF": "outer6run, C+temperature inside five training runs",
+    "final": "C via6run training CV, temp on selectedC6run OOF, refitT288",
+    "SOURCE_ONLY_diagnostic": true
+  },
+  "calibration": {
+    "deep": "one positive scalar per subject/seed/family fitted T OOF NLL",
+    "bounds": [
+      0.1,
+      10
+    ],
+    "objective": "original bounded logtemperature NLL",
+    "fallback": "identity only if optimizer unstable/nonfinite; same rule for all",
+    "LR": "preserve original inner training-OOF calibration",
+    "base_method": "calibrated deep probabilities; raw stored separately"
+  },
+  "fusion": {
+    "methods": [
+      "A0",
+      "A1",
+      "A2",
+      "A3",
+      "A4"
+    ],
+    "TCF_methods": [
+      "T0",
+      "T1",
+      "T2",
+      "T3",
+      "T4"
+    ],
+    "primary": "A3",
+    "matched_control": "A2",
+    "lambda_grid": [
+      0.0,
+      0.05,
+      0.1,
+      0.2,
+      0.3
+    ],
+    "selection": "highest mean-run T OOF BA; tie smallest lambda",
+    "lambda0_exact_base": true,
+    "no_class_specific_weights": true,
+    "OOF_optimization_optimistic": true
+  },
+  "GPU": {
+    "device": "cuda:0",
+    "mandatory": true,
+    "CPU_fallback": false,
+    "OOM_policy": "stop and resume; no automatic batch-size or method change",
+    "AMP": false,
+    "TF32": false,
+    "deterministic_algorithms": true,
+    "checkpoint_interval_epochs": 10,
+    "precision": "float32"
+  },
+  "statistics": {
+    "unit": "subject n9; average three matched seed metrics per subject",
+    "primary": "BA",
+    "contrasts": [
+      "A3-A0",
+      "A3-A2",
+      "A3-A4",
+      "A3-A1"
+    ],
+    "bootstrap_resamples": 10000,
+    "bootstrap_seed": 20261009,
+    "CI": "paired subject percentile95%",
+    "Wilcoxon": "two-sided omit zero differences",
+    "Holm": "four contrasts per separate backbone/window family",
+    "numerical_zero": "round12; absolute<1e-12 treated zero",
+    "strong": "all7descriptive gates AND gain/specificity CI lower>0 and both Holmp<.05 AND all3seed group mean gains>0 AND all3seed group mean specificity>0 AND complete integrity audit",
+    "absolute_target_BA": 0.8
+  },
+  "scoring": {
+    "authorized_passes": 1,
+    "official_label_files": 9,
+    "all_families_and_modes_in_one_pass": true,
+    "no_postscore_model_fitting": true
+  },
+  "schema": "hga.bcic.core.v1",
+  "runtime_paths": {
+    "data_root": "data/bcic",
+    "source_assets": "data/source_assets.npz",
+    "output_root": "outputs/bcic"
+  },
+  "source_features": {
+    "bands_hz": [
+      [
+        8,
+        12
+      ],
+      [
+        12,
+        16
+      ],
+      [
+        16,
+        22
+      ],
+      [
+        22,
+        30
+      ]
+    ],
+    "epoch_window_samples": [
+      [
+        250,
+        525
+      ],
+      [
+        525,
+        800
+      ],
+      [
+        800,
+        1075
+      ]
+    ],
+    "source_dimensions": 272,
+    "sensor_dimensions": 264,
+    "PCA_components_per_block": 48,
+    "Welch": {
+      "fs": 250,
+      "window": "hann",
+      "nperseg": 250,
+      "noverlap": 125,
+      "nfft": 250,
+      "detrend": "constant",
+      "scaling": "density"
+    },
+    "ROI_names": [
+      "lh_precentral",
+      "lh_postcentral",
+      "lh_paracentral",
+      "lh_caudalmiddlefrontal",
+      "rh_precentral",
+      "rh_postcentral",
+      "rh_paracentral",
+      "rh_caudalmiddlefrontal"
+    ],
+    "power_pooling": "sum free xyz PSD, integrate bands, mean vertices, then logarithm",
+    "controls": "eight fixed pooled sensor channels and row-normalized random projection seed20261009"
+  },
+  "code_release_note": "Portable core extraction; runtime artifacts and historical paths are intentionally excluded."
+}

@@ -1,0 +1,234 @@
+{
+  "dataset": "HGD official released train/test EDF",
+  "subjects": [
+    "H01",
+    "H02",
+    "H03",
+    "H04",
+    "H05",
+    "H06",
+    "H07",
+    "H08",
+    "H09",
+    "H10",
+    "H11",
+    "H12",
+    "H13",
+    "H14"
+  ],
+  "seeds": [
+    11,
+    22,
+    33
+  ],
+  "classes": [
+    "LEFT_HAND",
+    "RIGHT_HAND",
+    "FEET",
+    "REST"
+  ],
+  "input": {
+    "channels": [
+      "Fz",
+      "FC3",
+      "FC1",
+      "FCz",
+      "FC2",
+      "FC4",
+      "C5",
+      "C3",
+      "C1",
+      "Cz",
+      "C2",
+      "C4",
+      "C6",
+      "CP3",
+      "CP1",
+      "CPz",
+      "CP2",
+      "CP4",
+      "P1",
+      "Pz",
+      "P2",
+      "POz"
+    ],
+    "reference": "pointwise22-channel CAR",
+    "units": "V",
+    "sampling_rate_hz": 250,
+    "original_sampling_rate_hz": 500,
+    "anti_alias": "scipy.signal.resample_poly continuous recording 1/2, default fixed Kaiser5 window",
+    "seconds_relative_to_cue": [
+      -0.5,
+      4.0
+    ],
+    "samples": 1125,
+    "no_artifact_trial_rejection": true,
+    "legacy_cache_reused": false
+  },
+  "source_windows_relative_to_cue_s": [
+    [
+      0.5,
+      1.6
+    ],
+    [
+      1.6,
+      2.7
+    ],
+    [
+      2.7,
+      3.8
+    ]
+  ],
+  "ATCNet": {
+    "epochs": 500,
+    "batch_size": 64,
+    "optimizer": "Adam",
+    "lr": 0.001,
+    "betas": [
+      0.9,
+      0.999
+    ],
+    "eps": 1e-07,
+    "optimizer_weight_decay": 0,
+    "explicit_official_conv_L2": 0.009,
+    "explicit_official_dense_L2": 0.5,
+    "maxNorm": 0.6,
+    "scheduler": null,
+    "augmentation": null,
+    "gradient_clipping": null,
+    "normalization": "per-channel,timepoint scaler fitted across training trials only",
+    "checkpoint": "final epoch500",
+    "OOF_fits": 438,
+    "final_fits": 42
+  },
+  "LR": {
+    "C_grid": [
+      0.01,
+      0.1,
+      1.0
+    ],
+    "solver": "lbfgs",
+    "max_iter": 2000,
+    "tol": 1e-07,
+    "PCA": "training partition StandardScaler/PCA full-SVD48/score StandardScaler; no sqrt48",
+    "C_and_temperature_selection": "nested training-run OOF, best mean run BA; smallestC tie; full refit uses all training runs"
+  },
+  "calibration": {
+    "deep": "one positive scalar per subject/seed/family fitted T OOF NLL",
+    "bounds": [
+      0.1,
+      10
+    ],
+    "objective": "original bounded logtemperature NLL",
+    "fallback": "identity only if optimizer unstable/nonfinite; same rule for all",
+    "LR": "preserve original inner training-OOF calibration",
+    "base_method": "calibrated deep probabilities; raw stored separately"
+  },
+  "fusion": {
+    "lambda_grid": [
+      0.0,
+      0.05,
+      0.1,
+      0.2,
+      0.3
+    ],
+    "formula": "(1-lambda)P_ATC+lambda P_LR",
+    "selection": "highest mean native-run training OOF BA; smallest lambda on tie",
+    "primary": "M1",
+    "matched_control": "M2",
+    "OOF_optimization_optimistic": true,
+    "lambda0_exact_baseline": true
+  },
+  "GPU": {
+    "device": "cuda:0",
+    "mandatory": true,
+    "CPU_fallback": false,
+    "OOM_policy": "stop and resume; no automatic batch-size or method change",
+    "AMP": false,
+    "TF32": false,
+    "deterministic_algorithms": true,
+    "checkpoint_interval_epochs": 10,
+    "precision": "float32"
+  },
+  "statistics": {
+    "unit": "subject n14; mean3 matched seed metrics first",
+    "bootstrap": 10000,
+    "seed": 20261011,
+    "Wilcoxon": "paired two-sided; omit numerical zeros; scipy auto",
+    "Holm": "2 registered contrasts",
+    "no_trials_or_seeds_as_independent_units": true
+  },
+  "interpretation": "frozen-method external dataset validation; HGD-trained classifier heads, not zero-shot BCIC-weight transfer; historical project-level HGD exposure",
+  "OOF": "LORO of each training file native groups; new group if onset gap>10 seconds; never split trials randomly",
+  "scoring": {
+    "all_models_and_lambdas_frozen_before_test_signal_inference": true,
+    "all_predictions_frozen_before_test_class_text_decode": true,
+    "once_per_subject": true,
+    "no_postscore_fitting": true
+  },
+  "schema": "hga.hgd.core.v1",
+  "runtime_paths": {
+    "data_root": "data/hgd",
+    "source_assets": "data/source_assets.npz",
+    "output_root": "outputs/hgd"
+  },
+  "source_features": {
+    "bands_hz": [
+      [
+        8,
+        12
+      ],
+      [
+        12,
+        16
+      ],
+      [
+        16,
+        22
+      ],
+      [
+        22,
+        30
+      ]
+    ],
+    "epoch_window_samples": [
+      [
+        250,
+        525
+      ],
+      [
+        525,
+        800
+      ],
+      [
+        800,
+        1075
+      ]
+    ],
+    "source_dimensions": 272,
+    "sensor_dimensions": 264,
+    "PCA_components_per_block": 48,
+    "Welch": {
+      "fs": 250,
+      "window": "hann",
+      "nperseg": 250,
+      "noverlap": 125,
+      "nfft": 250,
+      "detrend": "constant",
+      "scaling": "density"
+    },
+    "ROI_names": [
+      "lh_precentral",
+      "lh_postcentral",
+      "lh_paracentral",
+      "lh_caudalmiddlefrontal",
+      "rh_precentral",
+      "rh_postcentral",
+      "rh_paracentral",
+      "rh_caudalmiddlefrontal"
+    ],
+    "power_pooling": "sum free xyz PSD, integrate bands, mean vertices, then logarithm",
+    "controls": "eight fixed pooled sensor channels and row-normalized random projection seed20261009"
+  },
+  "code_release_note": "Portable core extraction; runtime artifacts and historical paths are intentionally excluded."
+}

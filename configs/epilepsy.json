@@ -1,0 +1,71 @@
+{
+  "schema": "hga.epilepsy.v1",
+  "dataset": "eBrain high-density averaged interictal EEG with postoperative anatomy",
+  "sfreq_hz": 250,
+  "channels": 257,
+  "filter": {
+    "type": "fourth-order Butterworth",
+    "band_hz": [
+      1,
+      70
+    ],
+    "phase": "zero",
+    "notch_hz": 50
+  },
+  "reference": "common average",
+  "imaging_time": "first saved discrete sample reaching half maximum GFP; use frozen sample index",
+  "forward": {
+    "models": [
+      "individual BEM",
+      "Sphere",
+      "HGA"
+    ],
+    "primary_HGA_order": 8,
+    "common_order_sensitivity": [
+      4,
+      6,
+      8,
+      10,
+      12
+    ],
+    "same_sources_normals_channels_covariance": true
+  },
+  "inverse": {
+    "methods": [
+      "MNE",
+      "dSPM",
+      "sLORETA",
+      "eLORETA"
+    ],
+    "lambda2": 0.1111111111111111,
+    "depth": null,
+    "orientation": "common frozen cortical normals",
+    "noise_covariance": "same frozen covariance across forwards"
+  },
+  "endpoints": {
+    "distance": "clinical hemisphere peak to exact postoperative-mask triangle boundary; zero inside",
+    "hit_tolerances_mm": [
+      0,
+      10,
+      20
+    ],
+    "energy": "normalized squared amplitude in mask"
+  },
+  "analysis_units": {
+    "primary_paired": 19,
+    "common_order": 13,
+    "independent_postoperative": 18
+  },
+  "statistics": {
+    "unit": "patient",
+    "paired": "two-sided Wilcoxon",
+    "multiplicity": "Holm over three forward contrasts within inverse"
+  },
+  "paths": {
+    "EEG": "data/epilepsy/averaged-ied-epo.fif",
+    "covariance": "data/epilepsy/noise-cov.fif",
+    "source_assets": "data/epilepsy/head_assets.npz",
+    "postoperative_mask": "data/epilepsy/postoperative-mask.nii.gz",
+    "output": "outputs/epilepsy"
+  }
+}

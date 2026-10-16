@@ -1,0 +1,41 @@
+{
+  "schema": "hga.forward.v1",
+  "tissues": [
+    "brain",
+    "skull",
+    "scalp"
+  ],
+  "conductivity_S_per_m": [
+    0.33,
+    0.013,
+    0.33
+  ],
+  "geometry": "log radial graph",
+  "geometry_order": 12,
+  "field_order": 12,
+  "radius_scale_m": 0.1,
+  "quadrature": {
+    "n_theta": 64,
+    "n_phi": 128
+  },
+  "boundary_conditions": [
+    "potential continuity",
+    "normal current conservation",
+    "insulating scalp-air interface"
+  ],
+  "gauge": "zero-mean scalp potential",
+  "source_orientation": "free XYZ",
+  "EEG_reference": "common average applied to EEG and leadfield",
+  "inverse": {
+    "method": "minimum norm Tikhonov",
+    "lambda2": 0.1111111111111111,
+    "regularizer": "lambda2*trace(G@G.T)/n_channels"
+  },
+  "template": {
+    "subject": "fsaverage",
+    "source_spacing": "oct5",
+    "vertices": 2052,
+    "XYZ_columns": 6156,
+    "ROI_vertices": 346
+  }
+}

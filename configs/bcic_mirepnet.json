@@ -1,0 +1,144 @@
+{
+  "subjects": [
+    "A01",
+    "A02",
+    "A03",
+    "A04",
+    "A05",
+    "A06",
+    "A07",
+    "A08",
+    "A09"
+  ],
+  "seeds": [
+    11,
+    22,
+    33
+  ],
+  "classes": [
+    "LEFT_HAND",
+    "RIGHT_HAND",
+    "FEET",
+    "TONGUE"
+  ],
+  "preprocessing": {
+    "raw_source": "original GDF, independently generated",
+    "sfreq": 250,
+    "EEG_channels": 22,
+    "EOG_used": false,
+    "reference": "original acquisition reference, no CAR",
+    "band_Hz": [
+      8,
+      30
+    ],
+    "filter": "MNE1.6.1 fourth-order Butterworth SOS zero-phase per continuous run; explicit reconstruction choice",
+    "epoch_cue_seconds": [
+      0,
+      4
+    ],
+    "epoch_trial_start_seconds": [
+      2,
+      6
+    ],
+    "endpoint": "inclusive",
+    "samples": 1001,
+    "sample_resampling": "none, raw already250Hz",
+    "artifact_exclusion": false,
+    "normalization": "official EA separately for each train/eval subset; mean per-trial np.cov^-0.5",
+    "channel_alignment": "official inverse-distance interpolation22->45 AFTER EA",
+    "evaluation_transductive": true,
+    "EA_E_scope": "entire288-trial unlabeled E batch",
+    "upstream_full_BCIC2a_raw_generator_missing": true,
+    "not_ATC_or_TCFormer_preprocessing": true
+  },
+  "training": {
+    "epochs": 10,
+    "batch_size": 8,
+    "optimizer": "Adam",
+    "lr": 0.001,
+    "weight_decay": 1e-06,
+    "betas": [
+      0.9,
+      0.999
+    ],
+    "eps": 1e-08,
+    "scheduler": "CosineAnnealingLR",
+    "T_max": 10,
+    "all_backbone_trainable": true,
+    "checkpoint": "final epoch10 only",
+    "early_stopping": false,
+    "augmentation": false,
+    "gradient_clipping": false,
+    "AMP": false,
+    "TF32": false,
+    "num_workers": 0,
+    "loader_deviation": "official example workers4 ->0 on Windows; batch/shuffle/update unchanged",
+    "heldout_labels_used_in_training": false
+  },
+  "statistics": {
+    "metrics": [
+      "BA",
+      "MacroF1",
+      "Kappa",
+      "ECE"
+    ],
+    "contrasts": [
+      "M1-M0",
+      "M2-M0",
+      "M1-M2"
+    ],
+    "CI": "paired subject percentile bootstrap50000, seed20261011",
+    "Wilcoxon": "two-sided",
+    "Holm": "one family of12 tests",
+    "seed_metrics_averaged_before_subject_statistics": true
+  },
+  "evaluation": {
+    "development": "T six-run LORO",
+    "primary": "official AxxT -> AxxE",
+    "OOF_fits": 162,
+    "final_T_fits": 27,
+    "total_deep_fits": 189,
+    "no_new_HGA_classifier_training": true,
+    "Phase0_T_gate": {
+      "mean_subject_BA_min": 0.5,
+      "subjects_above_chance_min": 7,
+      "chance_BA": 0.25,
+      "finite_complete_OOF_required": true,
+      "interpretation": "engineering/development gate, not paper-number reproduction"
+    },
+    "final_E_reasonable_reporting_floor": 0.5,
+    "final_E_floor_scope": "report failure only; no E-dependent training or fusion decisions"
+  },
+  "schema": "hga.bcic.mirepnet.core.v1",
+  "training_settings": {
+    "epochs": 10,
+    "batch_size": 8,
+    "optimizer": "Adam",
+    "lr": 0.001,
+    "weight_decay": 1e-06,
+    "scheduler": "CosineAnnealingLR",
+    "T_max": 10,
+    "checkpoint": "fixed final epoch",
+    "seeds": [
+      11,
+      22,
+      33
+    ],
+    "OOF": "six-run leave-one-run-out training plus all-T refit"
+  },
+  "input_settings": {
+    "channels_original": 22,
+    "channels_model": 45,
+    "reference": "original acquisition reference; no CAR",
+    "fs": 250,
+    "continuous_run_filter": "fourth-order Butterworth8-30Hz SOS zero phase",
+    "cue_seconds": [
+      0,
+      4
+    ],
+    "samples_inclusive": 1001,
+    "alignment": "official EA fitted separately on each train/eval batch; no evaluation labels",
+    "all_trials_retained": true
+  },
+  "pretrained_weight_path": "data/weights/MIRepNet.pth"
+}
